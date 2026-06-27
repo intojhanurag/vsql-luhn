@@ -1,0 +1,40 @@
+INSTALL EXTENSION vsql_luhn;
+
+--echo # Valid credit card numbers (Luhn-valid test vectors)
+SELECT vsql_luhn.luhn_valid('4539148803436467');
+SELECT vsql_luhn.luhn_valid('4111111111111111');
+SELECT vsql_luhn.luhn_valid('5500000000000004');
+SELECT vsql_luhn.luhn_valid('340000000000009');
+
+--echo # Invalid credit card numbers (wrong check digit)
+SELECT vsql_luhn.luhn_valid('4539148803436460');
+SELECT vsql_luhn.luhn_valid('4111111111111112');
+SELECT vsql_luhn.luhn_valid('1234567890123456');
+
+--echo # Whitespace and hyphens are ignored
+SELECT vsql_luhn.luhn_valid('4539 1488 0343 6467');
+SELECT vsql_luhn.luhn_valid('4539-1488-0343-6467');
+SELECT vsql_luhn.luhn_valid('45 39-14 88-03 43-64 67');
+
+--echo # Non-numeric input returns FALSE (not an error)
+SELECT vsql_luhn.luhn_valid('abcdef');
+SELECT vsql_luhn.luhn_valid('4539-XXXX-0343-6467');
+
+--echo # Empty and short inputs
+SELECT vsql_luhn.luhn_valid('');
+SELECT vsql_luhn.luhn_valid('0');
+
+--echo # Valid single check: "0" with check digit "0" = "00"
+SELECT vsql_luhn.luhn_valid('00');
+SELECT vsql_luhn.luhn_valid('18');
+
+--echo # NULL input
+SELECT vsql_luhn.luhn_valid(NULL);
+
+--echo # IMEI number (valid Luhn)
+SELECT vsql_luhn.luhn_valid('490154203237518');
+
+--echo # Canadian SIN (valid Luhn)
+SELECT vsql_luhn.luhn_valid('046 454 286');
+
+UNINSTALL EXTENSION vsql_luhn;

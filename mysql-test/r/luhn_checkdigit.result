@@ -1,0 +1,38 @@
+INSTALL EXTENSION vsql_luhn;
+# Generate check digit for partial credit card number
+SELECT vsql_luhn.luhn_checkdigit('453914880343646');
+vsql_luhn.luhn_checkdigit('453914880343646')
+4539148803436467
+# Verify the generated number is valid
+SELECT vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('453914880343646'));
+vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('453914880343646'))
+1
+# Generate check digit for a short identifier
+SELECT vsql_luhn.luhn_checkdigit('7992739871');
+vsql_luhn.luhn_checkdigit('7992739871')
+79927398713
+# Verify roundtrip: checkdigit output always validates
+SELECT vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('12345'));
+vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('12345'))
+1
+SELECT vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('0'));
+vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('0'))
+1
+SELECT vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('999999999'));
+vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('999999999'))
+1
+# Input with separators is stripped in output
+SELECT vsql_luhn.luhn_checkdigit('4539 1488 0343 646');
+vsql_luhn.luhn_checkdigit('4539 1488 0343 646')
+4539148803436467
+# NULL input
+SELECT vsql_luhn.luhn_checkdigit(NULL);
+vsql_luhn.luhn_checkdigit(NULL)
+NULL
+# Non-numeric input produces an error
+SELECT vsql_luhn.luhn_checkdigit('abcdef');
+ERROR HY000: VDF error in function 'luhn_checkdigit': input must contain at least one digit
+# Empty input produces an error
+SELECT vsql_luhn.luhn_checkdigit('');
+ERROR HY000: VDF error in function 'luhn_checkdigit': input must contain at least one digit
+UNINSTALL EXTENSION vsql_luhn;

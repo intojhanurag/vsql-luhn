@@ -1,0 +1,31 @@
+INSTALL EXTENSION vsql_luhn;
+
+--echo # Generate check digit for partial credit card number
+SELECT vsql_luhn.luhn_checkdigit('453914880343646');
+
+--echo # Verify the generated number is valid
+SELECT vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('453914880343646'));
+
+--echo # Generate check digit for a short identifier
+SELECT vsql_luhn.luhn_checkdigit('7992739871');
+
+--echo # Verify roundtrip: checkdigit output always validates
+SELECT vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('12345'));
+SELECT vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('0'));
+SELECT vsql_luhn.luhn_valid(vsql_luhn.luhn_checkdigit('999999999'));
+
+--echo # Input with separators is stripped in output
+SELECT vsql_luhn.luhn_checkdigit('4539 1488 0343 646');
+
+--echo # NULL input
+SELECT vsql_luhn.luhn_checkdigit(NULL);
+
+--echo # Non-numeric input produces an error
+--error 3200
+SELECT vsql_luhn.luhn_checkdigit('abcdef');
+
+--echo # Empty input produces an error
+--error 3200
+SELECT vsql_luhn.luhn_checkdigit('');
+
+UNINSTALL EXTENSION vsql_luhn;

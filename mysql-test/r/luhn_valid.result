@@ -1,0 +1,68 @@
+INSTALL EXTENSION vsql_luhn;
+# Valid credit card numbers (Luhn-valid test vectors)
+SELECT vsql_luhn.luhn_valid('4539148803436467');
+vsql_luhn.luhn_valid('4539148803436467')
+1
+SELECT vsql_luhn.luhn_valid('4111111111111111');
+vsql_luhn.luhn_valid('4111111111111111')
+1
+SELECT vsql_luhn.luhn_valid('5500000000000004');
+vsql_luhn.luhn_valid('5500000000000004')
+1
+SELECT vsql_luhn.luhn_valid('340000000000009');
+vsql_luhn.luhn_valid('340000000000009')
+1
+# Invalid credit card numbers (wrong check digit)
+SELECT vsql_luhn.luhn_valid('4539148803436460');
+vsql_luhn.luhn_valid('4539148803436460')
+0
+SELECT vsql_luhn.luhn_valid('4111111111111112');
+vsql_luhn.luhn_valid('4111111111111112')
+0
+SELECT vsql_luhn.luhn_valid('1234567890123456');
+vsql_luhn.luhn_valid('1234567890123456')
+0
+# Whitespace and hyphens are ignored
+SELECT vsql_luhn.luhn_valid('4539 1488 0343 6467');
+vsql_luhn.luhn_valid('4539 1488 0343 6467')
+1
+SELECT vsql_luhn.luhn_valid('4539-1488-0343-6467');
+vsql_luhn.luhn_valid('4539-1488-0343-6467')
+1
+SELECT vsql_luhn.luhn_valid('45 39-14 88-03 43-64 67');
+vsql_luhn.luhn_valid('45 39-14 88-03 43-64 67')
+1
+# Non-numeric input returns FALSE (not an error)
+SELECT vsql_luhn.luhn_valid('abcdef');
+vsql_luhn.luhn_valid('abcdef')
+0
+SELECT vsql_luhn.luhn_valid('4539-XXXX-0343-6467');
+vsql_luhn.luhn_valid('4539-XXXX-0343-6467')
+0
+# Empty and short inputs
+SELECT vsql_luhn.luhn_valid('');
+vsql_luhn.luhn_valid('')
+0
+SELECT vsql_luhn.luhn_valid('0');
+vsql_luhn.luhn_valid('0')
+0
+# Valid single check: "0" with check digit "0" = "00"
+SELECT vsql_luhn.luhn_valid('00');
+vsql_luhn.luhn_valid('00')
+1
+SELECT vsql_luhn.luhn_valid('18');
+vsql_luhn.luhn_valid('18')
+1
+# NULL input
+SELECT vsql_luhn.luhn_valid(NULL);
+vsql_luhn.luhn_valid(NULL)
+NULL
+# IMEI number (valid Luhn)
+SELECT vsql_luhn.luhn_valid('490154203237518');
+vsql_luhn.luhn_valid('490154203237518')
+1
+# Canadian SIN (valid Luhn)
+SELECT vsql_luhn.luhn_valid('046 454 286');
+vsql_luhn.luhn_valid('046 454 286')
+1
+UNINSTALL EXTENSION vsql_luhn;
