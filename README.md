@@ -30,7 +30,7 @@ Generates the correct check digit for a partial identifier and returns the full 
 
 ```sql
 SELECT vsql_luhn.luhn_checkdigit('453914880343646');      -- '4539148803436467'
-SELECT vsql_luhn.luhn_checkdigit('7992739871');            -- '79927398710'
+SELECT vsql_luhn.luhn_checkdigit('7992739871');            -- '79927398713'
 ```
 
 ## Installation
