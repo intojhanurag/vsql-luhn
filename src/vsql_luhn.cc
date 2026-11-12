@@ -104,7 +104,7 @@ static void luhn_checkdigit(StringArg input, StringResult out) {
 
   std::string digits = strip_separators(input.value());
   if (digits.empty()) {
-    out.error("input must contain at least one digit");
+    out.warning("input must contain at least one digit");
     return;
   }
 
