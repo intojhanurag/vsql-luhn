@@ -29,10 +29,27 @@ vsql_luhn.luhn_checkdigit('4539 1488 0343 646')
 SELECT vsql_luhn.luhn_checkdigit(NULL);
 vsql_luhn.luhn_checkdigit(NULL)
 NULL
-# Non-numeric input produces an error
+# Non-numeric input returns NULL with a warning
 SELECT vsql_luhn.luhn_checkdigit('abcdef');
-ERROR HY000: VDF error in function 'luhn_checkdigit': input must contain at least one digit
-# Empty input produces an error
+vsql_luhn.luhn_checkdigit('abcdef')
+NULL
+Warnings:
+Warning	3200	VDF error in function 'luhn_checkdigit': input must contain at least one digit
+# Empty input returns NULL with a warning
 SELECT vsql_luhn.luhn_checkdigit('');
-ERROR HY000: VDF error in function 'luhn_checkdigit': input must contain at least one digit
+vsql_luhn.luhn_checkdigit('')
+NULL
+Warnings:
+Warning	3200	VDF error in function 'luhn_checkdigit': input must contain at least one digit
+# One bad row does not stop a query over many rows
+CREATE TABLE accounts (id INT PRIMARY KEY, n TEXT);
+INSERT INTO accounts VALUES (1, '7992739871'), (2, ''), (3, '12345');
+SELECT id, vsql_luhn.luhn_checkdigit(n) FROM accounts ORDER BY id;
+id	vsql_luhn.luhn_checkdigit(n)
+1	79927398713
+2	NULL
+3	123455
+Warnings:
+Warning	3200	VDF error in function 'luhn_checkdigit': input must contain at least one digit
+DROP TABLE accounts;
 UNINSTALL EXTENSION vsql_luhn;

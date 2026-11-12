@@ -20,12 +20,16 @@ SELECT vsql_luhn.luhn_checkdigit('4539 1488 0343 646');
 --echo # NULL input
 SELECT vsql_luhn.luhn_checkdigit(NULL);
 
---echo # Non-numeric input produces an error
---error 3200
+--echo # Non-numeric input returns NULL with a warning
 SELECT vsql_luhn.luhn_checkdigit('abcdef');
 
---echo # Empty input produces an error
---error 3200
+--echo # Empty input returns NULL with a warning
 SELECT vsql_luhn.luhn_checkdigit('');
+
+--echo # One bad row does not stop a query over many rows
+CREATE TABLE accounts (id INT PRIMARY KEY, n TEXT);
+INSERT INTO accounts VALUES (1, '7992739871'), (2, ''), (3, '12345');
+SELECT id, vsql_luhn.luhn_checkdigit(n) FROM accounts ORDER BY id;
+DROP TABLE accounts;
 
 UNINSTALL EXTENSION vsql_luhn;
