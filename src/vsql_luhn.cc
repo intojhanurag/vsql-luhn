@@ -16,10 +16,24 @@
 #include <villagesql/vsql.h>
 
 #include <cctype>
+#include <exception>
 #include <string>
 #include <string_view>
 
 using namespace vsql;
+
+// An exception that escapes a VDF aborts mysqld for every connection. Turn it
+// into a warning instead, so only this row returns NULL.
+template <typename Result, typename Body>
+static void guard(Result &out, Body &&body) {
+  try {
+    body();
+  } catch (const std::exception &e) {
+    out.warning(e.what());
+  } catch (...) {
+    out.warning("unexpected error");
+  }
+}
 
 // Strips whitespace and hyphens, returns empty string on non-digit input.
 static std::string strip_separators(std::string_view input) {
@@ -53,7 +67,7 @@ static int luhn_checksum(const std::string &digits) {
 // luhn_valid(value TEXT) -> INT
 // Returns 1 if the string passes the Luhn checksum, 0 otherwise.
 // Returns 0 (not an error) on non-numeric input.
-void vdf_luhn_valid(StringArg input, IntResult out) {
+static void luhn_valid(StringArg input, IntResult out) {
   if (input.is_null()) {
     out.set_null();
     return;
@@ -82,7 +96,7 @@ void vdf_luhn_valid(StringArg input, IntResult out) {
 
 // luhn_checkdigit(partial TEXT) -> TEXT
 // Appends the correct check digit to a partial identifier.
-void vdf_luhn_checkdigit(StringArg input, StringResult out) {
+static void luhn_checkdigit(StringArg input, StringResult out) {
   if (input.is_null()) {
     out.set_null();
     return;
@@ -99,6 +113,14 @@ void vdf_luhn_checkdigit(StringArg input, StringResult out) {
   digits += static_cast<char>('0' + check_digit);
 
   out.set(std::string_view(digits));
+}
+
+void vdf_luhn_valid(StringArg input, IntResult out) {
+  guard(out, [&] { luhn_valid(input, out); });
+}
+
+void vdf_luhn_checkdigit(StringArg input, StringResult out) {
+  guard(out, [&] { luhn_checkdigit(input, out); });
 }
 
 VEF_GENERATE_ENTRY_POINTS(
